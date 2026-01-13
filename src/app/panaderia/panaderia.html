@@ -1,0 +1,185 @@
+<link
+  href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&family=Inter:wght@300;400;500;600&display=swap"
+  rel="stylesheet"
+/>
+<link
+  rel="stylesheet"
+  href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css"
+/>
+<body>
+  <div class="container">
+    <header class="header">
+      <div class="logo-section">
+        <div class="logo">
+          <div class="wheat-icon">
+            <i class="fas fa-wheat-awn"></i>
+          </div>
+          <div class="logo-text">
+            <h1>Panadería</h1>
+            <span class="subtitle">El Sésamo</span>
+          </div>
+        </div>
+        <div class="business-info">
+          <div class="info-card">
+            <h2><i class="fas fa-store"></i> Panadería El Sésamo S.A</h2>
+            <div class="info-details">
+              <p><i class="fas fa-map-marker-alt"></i> C/Del trigo Nº24, 28916 Madrid</p>
+              <p><i class="fas fa-phone"></i> 91 694 55 66</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </header>
+
+    <main class="main-content">
+      <div class="product-selector">
+        <div class="section-header">
+          <h3><i class="fas fa-shopping-cart"></i> Añadir Producto</h3>
+        </div>
+
+        <div class="form-container">
+          <div class="form-group">
+            <label for="producto"><i class="fas fa-bread-slice"></i> Producto:</label>
+            <div class="select-wrapper">
+              <select
+                id="producto"
+                [(ngModel)]="productoSeleccionadoIndex"
+                (change)="actualizarPrecio()"
+              >
+                <option value="">Seleccionar producto</option>
+                <option *ngFor="let producto of productos; let i = index" [value]="i">
+                  {{ producto.emoji }} {{ producto.nombre }}
+                </option>
+              </select>
+              <i class="fas fa-chevron-down select-arrow"></i>
+            </div>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label for="precio"><i class="fas fa-euro-sign"></i> Precio unitario:</label>
+              <input
+                type="text"
+                id="precio"
+                [value]="precioActual.toFixed(2) + '€'"
+                readonly
+                placeholder="0.00€"
+              />
+            </div>
+
+            <div class="form-group">
+              <label for="cantidad"><i class="fas fa-calculator"></i> Cantidad:</label>
+              <div class="quantity-input">
+                <button type="button" (click)="cambiarCantidad(-1)" class="qty-btn">-</button>
+                <input
+                  type="number"
+                  id="cantidad"
+                  min="1"
+                  [(ngModel)]="cantidadSeleccionada"
+                  (ngModelChange)="calcularSubtotal()"
+                />
+                <button type="button" (click)="cambiarCantidad(1)" class="qty-btn">+</button>
+              </div>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label for="subtotal"><i class="fas fa-receipt"></i> Subtotal:</label>
+            <input
+              type="text"
+              id="subtotal"
+              [value]="subtotalActual.toFixed(2) + '€'"
+              readonly
+              placeholder="0.00€"
+              class="subtotal-input"
+            />
+          </div>
+
+          <button class="btn-add" (click)="agregarLinea()">
+            <i class="fas fa-plus-circle"></i>
+            Añadir al Ticket
+          </button>
+        </div>
+      </div>
+
+      <div class="ticket-section">
+        <div class="section-header">
+          <h3><i class="fas fa-receipt"></i> Ticket de Compra</h3>
+          <div class="ticket-actions">
+            <button class="btn-clear" (click)="limpiarTicket()">
+              <i class="fas fa-trash"></i> Limpiar Todo
+            </button>
+          </div>
+        </div>
+
+        <div class="table-container">
+          <table id="tablaTicket" class="ticket-table">
+            <thead>
+              <tr>
+                <th><i class="fas fa-tag"></i> Producto</th>
+                <th><i class="fas fa-euro-sign"></i> Precio</th>
+                <th><i class="fas fa-sort-numeric-up"></i> Cantidad</th>
+                <th><i class="fas fa-calculator"></i> Total</th>
+                <th><i class="fas fa-cog"></i> Acción</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr class="empty-state" *ngIf="lineasTicket.length === 0">
+                <td colspan="5">
+                  <div class="empty-message">
+                    <i class="fas fa-shopping-cart"></i>
+                    <p>No hay productos añadidos</p>
+                    <span>Selecciona un producto para comenzar</span>
+                  </div>
+                </td>
+              </tr>
+              <tr *ngFor="let linea of lineasTicket" class="ticket-item">
+                <td>
+                  <span class="product-emoji">{{ linea.emoji }}</span>
+                  {{ linea.nombre }}
+                </td>
+                <td>{{ linea.precio.toFixed(2) }}€</td>
+                <td>
+                  <div class="quantity-controls">
+                    <button (click)="modificarCantidad(linea.nombre, -1)" class="qty-btn-small">
+                      -
+                    </button>
+                    <span class="quantity-display">{{ linea.cantidad }}</span>
+                    <button (click)="modificarCantidad(linea.nombre, 1)" class="qty-btn-small">
+                      +
+                    </button>
+                  </div>
+                </td>
+                <td class="total-cell">{{ linea.total.toFixed(2) }}€</td>
+                <td>
+                  <button (click)="borrarLinea(linea.nombre)" class="btn-delete" title="Eliminar">
+                    <i class="fas fa-trash"></i>
+                  </button>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <div class="total-section">
+          <div class="total-info">
+            <div class="total-line">
+              <span>Subtotal:</span>
+              <span id="subtotalTicket">{{ totalTicket.toFixed(2) }}€</span>
+            </div>
+            <div class="total-line final-total">
+              <span>TOTAL:</span>
+              <span id="totalTicket">{{ totalTicket.toFixed(2) }}€</span>
+            </div>
+          </div>
+          <div class="action-buttons">
+            <button class="btn-print" (click)="imprimirTicket()">
+              <i class="fas fa-print"></i>
+              Imprimir Ticket
+            </button>
+          </div>
+        </div>
+      </div>
+    </main>
+  </div>
+</body>
